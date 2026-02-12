@@ -31,7 +31,11 @@ export const elements = {
     btnLimparPedido: $("#btnLimparPedido"),
 
     selectCategoriaProduto: $("#id_categoria_produto"),
-    selectProdutoPedido: $("#id_produto_pedido")
+    selectProdutoPedido: $("#id_produto_pedido"),
+
+    selectTipoCliente: $("#tipo_cliente"),
+    clientePfFields: $("#clientePfFields"),
+    clientePjFields: $("#clientePjFields")
 };
 
 export const query = $;

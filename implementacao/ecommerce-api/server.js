@@ -4,6 +4,7 @@ const ClienteDAO = require('./dao/ClienteDAO');
 const PedidoDAO = require('./dao/PedidoDAO');
 const ProdutoDAO = require('./dao/ProdutoDAO');
 const CategoriaDAO = require('./dao/CategoriaDAO');
+const SchemaDAO = require('./dao/SchemaDAO');
 
 const app = express();
 app.use(cors());
@@ -229,6 +230,14 @@ app.use((err, req, res, next) => {
     res.status(status).json({ mensagem });
 });
 
-app.listen(3000, () => {
-    console.log('Servidor rodando na porta 3000');
+async function iniciarServidor() {
+    await SchemaDAO.garantirModeloCliente();
+    app.listen(3000, () => {
+        console.log('Servidor rodando na porta 3000');
+    });
+}
+
+iniciarServidor().catch((erro) => {
+    console.error('Falha ao iniciar servidor:', erro);
+    process.exit(1);
 });

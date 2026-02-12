@@ -143,10 +143,72 @@ textarea {
     gap: 8px;
 }
 
+.availability-field {
+    display: grid;
+    gap: 6px;
+}
+
+.availability-field > span {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.toggle-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    width: min(100%, 360px);
+}
+
+.toggle-group input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.toggle-group label {
+    display: block;
+    padding: 9px 10px;
+    text-align: center;
+    background: #f8fafc;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    border-right: 1px solid var(--border);
+}
+
+.toggle-group label:last-child {
+    border-right: none;
+}
+
+#disponibilidade_produto_sim:checked + label {
+    background: #dcfce7;
+    color: #166534;
+    font-weight: 700;
+}
+
+#disponibilidade_produto_nao:checked + label {
+    background: #fee2e2;
+    color: #991b1b;
+    font-weight: 700;
+}
+
 .actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+#clientePfFields,
+#clientePjFields {
+    display: grid;
+    gap: 8px;
+}
+
+.is-hidden {
+    display: none !important;
 }
 
 button {

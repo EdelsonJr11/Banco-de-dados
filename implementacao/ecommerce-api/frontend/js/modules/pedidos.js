@@ -39,6 +39,11 @@ export function createPedidosModule({ elements, requestJson, message, formatters
         event.preventDefault();
 
         await runWithUiError(message, async () => {
+            const selectedOption = elements.selectProdutoPedido.selectedOptions?.[0];
+            if (selectedOption && selectedOption.dataset.disponivel === "false") {
+                throw new Error("Produto indisponivel nao pode ser pedido");
+            }
+
             const id = query("#id_pedido").value;
             const item = {
                 id_produto: formatters.toNumberOrNull(elements.selectProdutoPedido.value),

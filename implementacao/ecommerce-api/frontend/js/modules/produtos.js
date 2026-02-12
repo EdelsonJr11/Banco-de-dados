@@ -2,11 +2,35 @@ import { query } from "../dom.js";
 import { runWithUiError } from "./helpers.js";
 
 export function createProdutosModule({ elements, requestJson, message, formatters }) {
+    const getDisponibilidadeSelecionada = () => {
+        const checked = query('input[name="disponibilidade_produto"]:checked');
+        return checked ? checked.value === "true" : true;
+    };
+
+    const setDisponibilidadeSelecionada = (valor) => {
+        const isDisponivel = Boolean(valor);
+        const selector = isDisponivel
+            ? '#disponibilidade_produto_sim'
+            : '#disponibilidade_produto_nao';
+        const input = query(selector);
+        if (input) input.checked = true;
+    };
+
     const fillProdutoSelect = (produtos) => {
         const selected = elements.selectProdutoPedido.value;
+        const disponiveis = produtos.filter((p) => p.disponibilidade);
+        const indisponiveis = produtos.filter((p) => !p.disponibilidade);
         const options = [
             '<option value="">Selecione um produto</option>',
-            ...produtos.map((p) => `<option value="${p.id_produto}">${p.id_produto} - ${p.nome}</option>`)
+            ...disponiveis.map((p) => `<option value="${p.id_produto}" data-disponivel="true">${p.id_produto} - ${p.nome}</option>`),
+            ...(indisponiveis.length > 0
+                ? [
+                    '<option value="" disabled>----- Indisponiveis -----</option>',
+                    ...indisponiveis.map(
+                        (p) => `<option value="${p.id_produto}" disabled data-disponivel="false">${p.id_produto} - ${p.nome} (indisponivel)</option>`
+                    )
+                ]
+                : [])
         ];
 
         elements.selectProdutoPedido.innerHTML = options.join("");
@@ -19,7 +43,7 @@ export function createProdutosModule({ elements, requestJson, message, formatter
         query("#descricao_produto").value = "";
         query("#peso_produto").value = "";
         query("#preco_base_produto").value = "";
-        query("#disponibilidade_produto").checked = true;
+        setDisponibilidadeSelecionada(true);
         elements.selectCategoriaProduto.value = "";
     };
 
@@ -55,7 +79,7 @@ export function createProdutosModule({ elements, requestJson, message, formatter
                 descricao: query("#descricao_produto").value || null,
                 peso: formatters.toNumberOrNull(query("#peso_produto").value),
                 preco_base: formatters.toNumberOrNull(query("#preco_base_produto").value),
-                disponibilidade: query("#disponibilidade_produto").checked,
+                disponibilidade: getDisponibilidadeSelecionada(),
                 id_categoria: formatters.toNumberOrNull(elements.selectCategoriaProduto.value)
             };
 
@@ -89,7 +113,7 @@ export function createProdutosModule({ elements, requestJson, message, formatter
         query("#descricao_produto").value = produto.descricao || "";
         query("#peso_produto").value = produto.peso ?? "";
         query("#preco_base_produto").value = produto.preco_base ?? "";
-        query("#disponibilidade_produto").checked = Boolean(produto.disponibilidade);
+        setDisponibilidadeSelecionada(produto.disponibilidade);
         elements.selectCategoriaProduto.value = produto.id_categoria ?? "";
     };
 

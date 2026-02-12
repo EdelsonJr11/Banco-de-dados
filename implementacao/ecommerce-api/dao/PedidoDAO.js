@@ -31,12 +31,28 @@ class PedidoDAO {
     async buscarPrecosProdutos(client, itens) {
         const ids = [...new Set(itens.map((item) => item.id_produto))];
         const result = await client.query(
-            'SELECT id_produto, preco_base FROM produto WHERE id_produto = ANY($1::int[])',
+            `
+            SELECT
+                id_produto,
+                nome,
+                preco_base,
+                disponibilidade
+            FROM produto
+            WHERE id_produto = ANY($1::int[])
+            `,
             [ids]
         );
 
         if (result.rows.length !== ids.length) {
             const erro = new Error('Um ou mais produtos do pedido nao existem');
+            erro.status = 400;
+            throw erro;
+        }
+
+        const indisponiveis = result.rows.filter((row) => row.disponibilidade !== true);
+        if (indisponiveis.length > 0) {
+            const nomes = indisponiveis.map((row) => row.nome).join(', ');
+            const erro = new Error(`Produto indisponivel para pedido: ${nomes}`);
             erro.status = 400;
             throw erro;
         }
@@ -104,7 +120,8 @@ class PedidoDAO {
         const query = `
             SELECT
                 p.*,
-                c.nome AS cliente_nome,
+                COALESCE(pf.nome, pj.razao_social, '-') AS cliente_nome,
+                c.tipo AS cliente_tipo,
                 COUNT(i.id_item) AS quantidade_itens,
                 COALESCE(SUM(i.quantidade), 0) AS quantidade_total,
                 COALESCE(
@@ -117,9 +134,11 @@ class PedidoDAO {
                 COALESCE(SUM((i.quantidade * i.preco_unitario) - COALESCE(i.desconto, 0)), 0) AS total_pedido
             FROM pedido p
             JOIN cliente c ON c.id_cliente = p.id_cliente
+            LEFT JOIN pessoa_fisica pf ON pf.id_cliente = c.id_cliente
+            LEFT JOIN pessoa_juridica pj ON pj.id_cliente = c.id_cliente
             LEFT JOIN item_pedido i ON i.id_pedido = p.id_pedido
             LEFT JOIN produto pr ON pr.id_produto = i.id_produto
-            GROUP BY p.id_pedido, c.nome
+            GROUP BY p.id_pedido, c.id_cliente, pf.nome, pj.razao_social, c.tipo
             ORDER BY p.id_pedido`;
 
         const result = await pool.query(query);
@@ -223,13 +242,16 @@ class PedidoDAO {
                 p.data_criacao,
                 p.data_previsao_entrega,
                 c.id_cliente,
-                c.nome AS cliente_nome,
+                COALESCE(pf.nome, pj.razao_social, '-') AS cliente_nome,
+                c.tipo AS cliente_tipo,
                 c.email AS cliente_email,
                 COALESCE(SUM((i.quantidade * i.preco_unitario) - COALESCE(i.desconto, 0)), 0) AS total_pedido
             FROM pedido p
             JOIN cliente c ON p.id_cliente = c.id_cliente
+            LEFT JOIN pessoa_fisica pf ON pf.id_cliente = c.id_cliente
+            LEFT JOIN pessoa_juridica pj ON pj.id_cliente = c.id_cliente
             LEFT JOIN item_pedido i ON i.id_pedido = p.id_pedido
-            GROUP BY p.id_pedido, c.id_cliente
+            GROUP BY p.id_pedido, c.id_cliente, pf.nome, pj.razao_social, c.tipo
             ORDER BY p.id_pedido
         `;
         const result = await pool.query(query);
@@ -246,16 +268,26 @@ class PedidoDAO {
                 FROM pedido p
                 LEFT JOIN item_pedido i ON i.id_pedido = p.id_pedido
                 GROUP BY p.id_pedido, p.id_cliente
+            ),
+            cliente_com_nome AS (
+                SELECT
+                    c.id_cliente,
+                    c.tipo,
+                    COALESCE(pf.nome, pj.razao_social, '-') AS nome
+                FROM cliente c
+                LEFT JOIN pessoa_fisica pf ON pf.id_cliente = c.id_cliente
+                LEFT JOIN pessoa_juridica pj ON pj.id_cliente = c.id_cliente
             )
             SELECT
-                c.id_cliente,
-                c.nome,
+                ccn.id_cliente,
+                ccn.nome,
+                ccn.tipo,
                 COALESCE(COUNT(tpp.id_pedido), 0)::INT AS total_pedidos,
                 COALESCE(SUM(tpp.total_pedido), 0)::NUMERIC(12,2) AS total_vendas
-            FROM cliente c
-            LEFT JOIN total_por_pedido tpp ON tpp.id_cliente = c.id_cliente
-            GROUP BY c.id_cliente, c.nome
-            ORDER BY total_vendas DESC, c.nome
+            FROM cliente_com_nome ccn
+            LEFT JOIN total_por_pedido tpp ON tpp.id_cliente = ccn.id_cliente
+            GROUP BY ccn.id_cliente, ccn.nome, ccn.tipo
+            ORDER BY total_vendas DESC, ccn.nome
         `;
         const result = await pool.query(query);
         return result.rows;

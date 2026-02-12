@@ -7,6 +7,7 @@ export function createRelatoriosModule({ elements, requestJson, message, formatt
                 <td>${p.id_pedido}</td>
                 <td>${p.id_cliente}</td>
                 <td>${p.cliente_nome}</td>
+                <td>${p.cliente_tipo ?? "-"}</td>
                 <td>${p.cliente_email}</td>
                 <td>${formatters.formatDateTime(p.data_criacao)}</td>
                 <td>${formatters.formatMoney(p.total_pedido)}</td>
@@ -19,6 +20,7 @@ export function createRelatoriosModule({ elements, requestJson, message, formatt
             <tr>
                 <td>${r.id_cliente}</td>
                 <td>${r.nome}</td>
+                <td>${r.tipo ?? "-"}</td>
                 <td>${r.total_pedidos}</td>
                 <td>${formatters.formatMoney(r.total_vendas)}</td>
             </tr>
