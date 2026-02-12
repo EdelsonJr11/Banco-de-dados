@@ -1,0 +1,160 @@
+Modelo Conceitual (MER) - Sistema de Controle de Vendas (E-commerce Simples)
+Notação: Peter Chen
+
+================================================================================
+1. INTRODUÇÃO / MINIMUNDO
+================================================================================
+
+O Sistema de Controle de Vendas é uma solução desenvolvida para gerenciar as 
+operações de um e-commerce simples, permitindo o cadastro e controle de clientes, 
+produtos, pedidos e entregas. Os principais usuários do sistema são os 
+administradores da loja virtual, que poderão gerenciar o catálogo de produtos e 
+acompanhar os pedidos, e os clientes, que realizarão compras através da plataforma.
+
+O sistema resolve problemas como a falta de organização no controle de estoque, 
+a dificuldade no rastreamento de pedidos e a ausência de um histórico estruturado 
+de vendas. Com sua implantação, será possível otimizar o processo de vendas, 
+melhorar o atendimento ao cliente e ter visibilidade completa sobre o status das 
+entregas.
+
+MINIMUNDO:
+No contexto deste sistema, um CLIENTE pode ser uma PESSOA FÍSICA, identificada 
+pelo CPF e data de nascimento, ou uma PESSOA JURÍDICA, identificada pelo CNPJ e 
+razão social. Cada cliente possui nome, e-mail, múltiplos telefones de contato e 
+um endereço completo composto por rua, número, bairro, cidade e CEP. Os clientes 
+realizam PEDIDOS, que contêm uma data de criação, previsão de entrega e um valor 
+total calculado automaticamente. Cada pedido é composto por um ou mais ITENS DE 
+PEDIDO, que referenciam PRODUTOS específicos do catálogo, informando quantidade, 
+preço unitário e eventuais descontos. Os produtos estão organizados em CATEGORIAS, 
+que podem formar uma hierarquia de subcategorias. Por fim, cada pedido possui um 
+histórico de STATUS DE ENTREGA, registrando as etapas do processo logístico como 
+"Em separação", "Em trânsito" e "Entregue", com data e responsável pelo registro.
+
+================================================================================
+2.1 ENTIDADES E ATRIBUTOS
+================================================================================
+
+1. CLIENTE
+   Atributos:
+   - idCliente (PK) [chave primária - sublinhado]
+   - nome [simples]
+   - email [simples]
+   - dataNascimento [simples]
+   - idade [derivado - tracejado] (calculado a partir de dataNascimento)
+   - telefones [multivalorado - elipse com borda dupla]
+   - enderecoCompleto [composto] → (rua, numero, bairro, cidade, cep)
+   
+   Generalização/Especialização (disjunção - "d"):
+   * PESSOA FÍSICA {cpf (UN), dataNascimento, genero}
+   * PESSOA JURÍDICA {cnpj (UN), razaoSocial, inscricaoEstadual}
+
+2. PEDIDO
+   Atributos:
+   - idPedido (PK) [chave primária - sublinhado]
+   - dataCriacao [simples]
+   - dataPrevisaoEntrega [simples]
+   - totalPedido [derivado - tracejado] (= SUM(quantidade × precoUnitario) dos itens)
+
+3. ITEM PEDIDO (Entidade Fraca - retângulo com borda dupla)
+   Atributos:
+   - idItem (PK parcial) [chave parcial - sublinhado tracejado]
+   - quantidade [simples]
+   - precoUnitario [simples]
+   - desconto [simples]
+
+4. PRODUTO
+   Atributos:
+   - idProduto (PK) [chave primária - sublinhado]
+   - nome [simples]
+   - descricao [simples]
+   - peso [simples]
+   - precoBase [simples]
+   - disponibilidade [simples]
+
+5. CATEGORIA
+   Atributos:
+   - idCategoria (PK) [chave primária - sublinhado]
+   - nomeCategoria [simples]
+   - descricao [simples]
+   - nivel [simples]
+
+6. STATUS ENTREGA
+   Atributos:
+   - idStatus (PK) [chave primária - sublinhado]
+   - nomeStatus [multivalorado - elipse com borda dupla]
+   - descricao [simples]
+   - dataRegistro [simples]
+   - responsavel [simples]
+
+================================================================================
+2.2 RELACIONAMENTOS / AÇÕES
+================================================================================
+
+1. CLIENTE – PEDIDO (faz)
+   - Um cliente pode realizar um ou mais pedidos na loja;
+   - Um pedido pertence a apenas um cliente;
+   - Cardinalidade: (1:N)
+
+2. CLIENTE – ESPECIALIZAÇÃO (generaliza)
+   - Um cliente pode ser Pessoa Física OU Pessoa Jurídica, mas nunca ambos;
+   - Toda Pessoa Física ou Pessoa Jurídica é obrigatoriamente um Cliente;
+   - Restrição: Disjunção (d)
+
+3. PEDIDO – ITEM PEDIDO (contém)
+   - Um pedido contém um ou mais itens;
+   - Um item de pedido pertence a apenas um pedido (entidade fraca);
+   - Cardinalidade: (1:N)
+   - Relacionamento identificador (losango com borda dupla)
+
+4. ITEM PEDIDO – PRODUTO (referencia)
+   - Um item de pedido referencia exatamente um produto;
+   - Um produto pode ser referenciado por vários itens de pedido;
+   - Cardinalidade: (N:1)
+
+5. PRODUTO – CATEGORIA (pertence)
+   - Um produto pertence a uma única categoria;
+   - Uma categoria pode conter vários produtos;
+   - Cardinalidade: (N:1)
+
+6. CATEGORIA – CATEGORIA (subcategoria)
+   - Uma categoria pode ter várias subcategorias;
+   - Uma subcategoria pode ter no máximo uma categoria pai;
+   - Cardinalidade: (0..N : 0..1) – Auto-relacionamento
+
+7. PEDIDO – STATUS ENTREGA (possui)
+   - Um pedido possui um ou mais registros de status ao longo do tempo;
+   - Um registro de status pertence a apenas um pedido;
+   - Cardinalidade: (1:N)
+
+================================================================================
+RESUMO DAS CARDINALIDADES
+================================================================================
+
+| Relacionamento | Entidade A      | Ação           | Entidade B       | Card.     |
+|----------------|-----------------|----------------|------------------|-----------|
+| faz            | Cliente         | realiza        | Pedido           | 1:N       |
+| generaliza     | Cliente         | especializa    | PF / PJ          | disjunção |
+| contém         | Pedido          | inclui         | ItemPedido       | 1:N       |
+| referencia     | ItemPedido      | refere-se a    | Produto          | N:1       |
+| pertence       | Produto         | categorizado   | Categoria        | N:1       |
+| subcategoria   | Categoria       | possui pai     | Categoria        | 0..N:0..1 |
+| possui         | Pedido          | registra       | StatusEntrega    | 1:N       |
+
+================================================================================
+LEGENDA DA NOTAÇÃO PETER CHEN
+================================================================================
+
+| Elemento                | Representação Visual                          |
+|-------------------------|-----------------------------------------------|
+| Entidade                | Retângulo                                     |
+| Entidade Fraca          | Retângulo com borda dupla                     |
+| Atributo Simples        | Elipse                                        |
+| Atributo Chave (PK)     | Elipse com texto sublinhado                   |
+| Atributo Multivalorado  | Elipse com borda dupla                        |
+| Atributo Composto       | Elipse conectada a sub-elipses                |
+| Atributo Derivado       | Elipse com borda tracejada                    |
+| Relacionamento          | Losango                                       |
+| Rel. Identificador      | Losango com borda dupla                       |
+| Generalização           | Triângulo com "d" (disjunção) ou "o" (overlap)|
+
+ 
