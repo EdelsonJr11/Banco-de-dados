@@ -2,140 +2,203 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>CRUD Cliente - E-commerce</title>
-    <style>
-        body { font-family: Arial; margin: 40px; }
-        input { display:block; margin:5px 0; padding:5px; }
-        button { margin:5px 0; padding:5px 10px; }
-        table { border-collapse: collapse; margin-top:20px; }
-        th, td { border:1px solid #ccc; padding:8px; }
-        th { background:#f2f2f2; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel E-commerce</title>
+    <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
+    <header class="topbar">
+        <div class="brand">
+            <h1>Painel Administrativo</h1>
+            <p>E-commerce API</p>
+        </div>
 
-<h2>Administração de clientes</h2>
+        <nav class="nav" id="mainNav">
+            <a class="nav-link is-active" href="#" data-view="relatorios">Relatorios</a>
+            <a class="nav-link" href="#" data-view="clientes">Clientes</a>
+            <a class="nav-link" href="#" data-view="categorias">Categorias</a>
+            <a class="nav-link" href="#" data-view="produtos">Produtos</a>
+            <a class="nav-link" href="#" data-view="pedidos">Pedidos</a>
+        </nav>
+    </header>
 
-<h3>Cadastrar / Atualizar Cliente</h3>
+    <p id="mensagem" class="message" aria-live="polite"></p>
 
-<input type="hidden" id="id_cliente">
-<input type="text" id="nome" placeholder="Nome">
-<input type="email" id="email" placeholder="Email">
-<input type="text" id="rua" placeholder="Rua">
-<input type="text" id="numero" placeholder="Número">
-<input type="text" id="bairro" placeholder="Bairro">
-<input type="text" id="cidade" placeholder="Cidade">
-<input type="text" id="cep" placeholder="CEP">
+    <main class="container">
+        <section class="view is-active" id="view-relatorios">
+            <div class="section-header">
+                <h2>Relatorios</h2>
+                <button id="btnAtualizarRelatorios" type="button">Atualizar Relatorios</button>
+            </div>
 
-<button onclick="salvar()">Salvar</button>
-<button onclick="limpar()">Limpar</button>
+            <h3>Pedidos com Cliente (JOIN)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>ID Cliente</th>
+                        <th>Cliente</th>
+                        <th>Email</th>
+                        <th>Data Criacao</th>
+                        <th>Total Pedido</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaPedidosJoin"></tbody>
+            </table>
 
-<h3>Lista de Clientes</h3>
-<button onclick="listar()">Atualizar Lista</button>
+            <h3>Vendas por Cliente (GROUP BY)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Cliente</th>
+                        <th>Cliente</th>
+                        <th>Total Pedidos</th>
+                        <th>Total Vendas</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaRelatorio"></tbody>
+            </table>
+        </section>
 
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody id="tabelaClientes"></tbody>
-</table>
+        <section class="view" id="view-clientes">
+            <h2>Clientes</h2>
 
-<script>
+            <form id="formCliente">
+                <input type="hidden" id="id_cliente">
+                <input type="text" id="nome" placeholder="Nome" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="text" id="rua" placeholder="Rua" required>
+                <input type="text" id="numero" placeholder="Numero">
+                <input type="text" id="bairro" placeholder="Bairro" required>
+                <input type="text" id="cidade" placeholder="Cidade" required>
+                <input type="text" id="cep" placeholder="CEP" required>
 
-const api = "http://localhost:3000/clientes";
+                <div class="actions">
+                    <button type="submit">Salvar Cliente</button>
+                    <button id="btnLimparCliente" type="button">Limpar</button>
+                    <button id="btnAtualizarClientes" type="button">Atualizar Lista</button>
+                </div>
+            </form>
 
-async function listar() {
-    const response = await fetch(api);
-    const clientes = await response.json();
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Acoes</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaClientes"></tbody>
+            </table>
+        </section>
 
-    const tabela = document.getElementById("tabelaClientes");
-    tabela.innerHTML = "";
+        <section class="view" id="view-categorias">
+            <h2>Categorias</h2>
 
-    clientes.forEach(c => {
-        tabela.innerHTML += `
-            <tr>
-                <td>${c.id_cliente}</td>
-                <td>${c.nome}</td>
-                <td>${c.email}</td>
-                <td>
-                    <button onclick="editar(${c.id_cliente})">Editar</button>
-                    <button onclick="deletar(${c.id_cliente})">Excluir</button>
-                </td>
-            </tr>
-        `;
-    });
-}
+            <form id="formCategoria">
+                <input type="hidden" id="id_categoria">
+                <input type="text" id="nome_categoria" placeholder="Nome da categoria" required>
+                <textarea id="descricao_categoria" placeholder="Descricao"></textarea>
 
-async function salvar() {
-    const id = document.getElementById("id_cliente").value;
+                <div class="actions">
+                    <button type="submit">Salvar Categoria</button>
+                    <button id="btnLimparCategoria" type="button">Limpar</button>
+                    <button id="btnAtualizarCategorias" type="button">Atualizar Lista</button>
+                </div>
+            </form>
 
-    const cliente = {
-        nome: document.getElementById("nome").value,
-        email: document.getElementById("email").value,
-        rua: document.getElementById("rua").value,
-        numero: document.getElementById("numero").value,
-        bairro: document.getElementById("bairro").value,
-        cidade: document.getElementById("cidade").value,
-        cep: document.getElementById("cep").value
-    };
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Descricao</th>
+                        <th>Acoes</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaCategorias"></tbody>
+            </table>
+        </section>
 
-    if (id === "") {
-        await fetch(api, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(cliente)
-        });
-    } else {
-        await fetch(`${api}/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(cliente)
-        });
-    }
+        <section class="view" id="view-produtos">
+            <h2>Produtos</h2>
 
-    limpar();
-    listar();
-}
+            <form id="formProduto">
+                <input type="hidden" id="id_produto">
+                <input type="text" id="nome_produto" placeholder="Nome do produto" required>
+                <textarea id="descricao_produto" placeholder="Descricao"></textarea>
+                <input type="number" id="peso_produto" step="0.01" placeholder="Peso">
+                <input type="number" id="preco_base_produto" step="0.01" placeholder="Preco base" required>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="disponibilidade_produto"> Disponivel
+                </label>
+                <select id="id_categoria_produto" required>
+                    <option value="">Selecione uma categoria</option>
+                </select>
 
-async function editar(id) {
-    const response = await fetch(`${api}/${id}`);
-    const c = await response.json();
+                <div class="actions">
+                    <button id="btnAtualizarCategoriasProduto" type="button">Atualizar Categorias</button>
+                    <button type="submit">Salvar Produto</button>
+                    <button id="btnLimparProduto" type="button">Limpar</button>
+                    <button id="btnAtualizarProdutos" type="button">Atualizar Lista</button>
+                </div>
+            </form>
 
-    document.getElementById("id_cliente").value = c.id_cliente;
-    document.getElementById("nome").value = c.nome;
-    document.getElementById("email").value = c.email;
-    document.getElementById("rua").value = c.rua;
-    document.getElementById("numero").value = c.numero;
-    document.getElementById("bairro").value = c.bairro;
-    document.getElementById("cidade").value = c.cidade;
-    document.getElementById("cep").value = c.cep;
-}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Preco Base</th>
+                        <th>Disponivel</th>
+                        <th>Acoes</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaProdutos"></tbody>
+            </table>
+        </section>
 
-async function deletar(id) {
-    await fetch(`${api}/${id}`, { method: "DELETE" });
-    listar();
-}
+        <section class="view" id="view-pedidos">
+            <h2>Pedidos</h2>
 
-function limpar() {
-    document.getElementById("id_cliente").value = "";
+            <form id="formPedido">
+                <input type="hidden" id="id_pedido">
+                <input type="date" id="data_previsao_entrega_pedido">
+                <input type="number" id="id_cliente_pedido" placeholder="ID do cliente" required>
+                <select id="id_produto_pedido" required>
+                    <option value="">Selecione um produto</option>
+                </select>
+                <input type="number" id="quantidade_item_pedido" min="1" step="1" placeholder="Quantidade" required>
+                <input type="number" id="desconto_item_pedido" min="0" step="0.01" placeholder="Desconto">
 
-    document.getElementById("nome").value = "";
-    document.getElementById("email").value = "";
-    document.getElementById("rua").value = "";
-    document.getElementById("numero").value = "";
-    document.getElementById("bairro").value = "";
-    document.getElementById("cidade").value = "";
-    document.getElementById("cep").value = "";
-}
+                <div class="actions">
+                    <button type="submit">Salvar Pedido</button>
+                    <button id="btnLimparPedido" type="button">Limpar</button>
+                    <button id="btnAtualizarPedidos" type="button">Atualizar Lista</button>
+                </div>
+            </form>
 
-listar();
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>ID Cliente</th>
+                        <th>Cliente</th>
+                        <th>Itens</th>
+                        <th>Qtd Total</th>
+                        <th>Data Criacao</th>
+                        <th>Data Previsao</th>
+                        <th>Total Pedido</th>
+                        <th>Acoes</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaPedidosCrud"></tbody>
+            </table>
+        </section>
+    </main>
 
-</script>
-
+    <script type="module" src="./app.js"></script>
 </body>
 </html>
