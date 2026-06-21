@@ -1,12 +1,34 @@
 const pool = require('../db');
 
 class ProdutoDAO {
+    criarErroValidacao(mensagem) {
+        const erro = new Error(mensagem);
+        erro.status = 400;
+        return erro;
+    }
+
+    normalizarEstoque(valor, valorPadrao = null) {
+        const estoque = valor === undefined || valor === null || valor === ''
+            ? valorPadrao
+            : Number(valor);
+
+        if (estoque === null) {
+            return null;
+        }
+
+        if (!Number.isInteger(estoque) || estoque < 0) {
+            throw this.criarErroValidacao('Estoque deve ser um numero inteiro maior ou igual a zero');
+        }
+
+        return estoque;
+    }
 
     // CREATE
     async inserir(produto) {
+        const estoque = this.normalizarEstoque(produto.estoque, 10);
         const query = `
             INSERT INTO produto
-            (nome, descricao, peso, preco_base, disponibilidade, id_categoria)
+            (nome, descricao, peso, preco_base, estoque, id_categoria)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *`;
 
@@ -15,7 +37,7 @@ class ProdutoDAO {
             produto.descricao,
             produto.peso,
             produto.preco_base,
-            produto.disponibilidade,
+            estoque,
             produto.id_categoria
         ];
 
@@ -53,13 +75,14 @@ class ProdutoDAO {
 
     // UPDATE
     async atualizar(id, produto) {
+        const estoque = this.normalizarEstoque(produto.estoque);
         const query = `
             UPDATE produto
             SET nome = $1,
                 descricao = $2,
                 peso = $3,
                 preco_base = $4,
-                disponibilidade = $5,
+                estoque = COALESCE($5, estoque),
                 id_categoria = $6
             WHERE id_produto = $7
             RETURNING *`;
@@ -69,7 +92,7 @@ class ProdutoDAO {
             produto.descricao,
             produto.peso,
             produto.preco_base,
-            produto.disponibilidade,
+            estoque,
             produto.id_categoria,
             id
         ];

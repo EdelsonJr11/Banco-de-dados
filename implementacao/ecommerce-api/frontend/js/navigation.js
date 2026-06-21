@@ -7,6 +7,7 @@ export function createNavigation(elements) {
         elements.navLinks.forEach((link) => {
             link.classList.toggle("is-active", link.dataset.view === view);
         });
+
     };
 
     const bind = () => {

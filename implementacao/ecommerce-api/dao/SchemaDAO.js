@@ -1,4 +1,6 @@
 const pool = require('../db');
+const fs = require('fs');
+const path = require('path');
 
 class SchemaDAO {
     async garantirModeloCliente() {
@@ -341,6 +343,12 @@ class SchemaDAO {
         } finally {
             client.release();
         }
+    }
+
+    async garantirRotinasEcommerce() {
+        const caminhoSql = path.join(__dirname, '..', 'sql', 'rotinas_ecommerce.sql');
+        const sql = fs.readFileSync(caminhoSql, 'utf8');
+        await pool.query(sql);
     }
 }
 

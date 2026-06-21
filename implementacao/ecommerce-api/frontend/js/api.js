@@ -1,4 +1,4 @@
-import { API_BASE } from "./config.js";
+import { API_BASE } from "./config.js?v=unificado-1";
 
 export async function requestJson(path, options = {}) {
     const config = { cache: "no-store", ...options };

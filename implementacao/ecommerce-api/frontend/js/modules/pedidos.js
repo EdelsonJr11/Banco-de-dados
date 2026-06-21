@@ -5,7 +5,7 @@ export function createPedidosModule({ elements, requestJson, message, formatters
     const clearForm = () => {
         query("#id_pedido").value = "";
         query("#data_previsao_entrega_pedido").value = "";
-        query("#id_cliente_pedido").value = "";
+        elements.selectClientePedido.value = "";
         elements.selectProdutoPedido.value = "";
         query("#quantidade_item_pedido").value = "";
         query("#desconto_item_pedido").value = "";
@@ -57,7 +57,7 @@ export function createPedidosModule({ elements, requestJson, message, formatters
 
             const pedido = {
                 data_previsao_entrega: query("#data_previsao_entrega_pedido").value || null,
-                id_cliente: formatters.toNumberOrNull(query("#id_cliente_pedido").value),
+                id_cliente: formatters.toNumberOrNull(elements.selectClientePedido.value),
                 itens: [item]
             };
 
@@ -90,7 +90,7 @@ export function createPedidosModule({ elements, requestJson, message, formatters
 
         query("#id_pedido").value = pedido.id_pedido;
         query("#data_previsao_entrega_pedido").value = formatters.toInputDate(pedido.data_previsao_entrega);
-        query("#id_cliente_pedido").value = pedido.id_cliente ?? "";
+        elements.selectClientePedido.value = pedido.id_cliente ?? "";
         elements.selectProdutoPedido.value = item ? item.id_produto : "";
         query("#quantidade_item_pedido").value = item ? item.quantidade : "";
         query("#desconto_item_pedido").value = item ? item.desconto : "";

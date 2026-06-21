@@ -31,7 +31,7 @@
                 <button id="btnAtualizarRelatorios" type="button">Atualizar Relatorios</button>
             </div>
 
-            <h3>Pedidos com Cliente (JOIN)</h3>
+            <h3>Pedidos com Cliente</h3>
             <table>
                 <thead>
                     <tr>
@@ -47,7 +47,7 @@
                 <tbody id="tabelaPedidosJoin"></tbody>
             </table>
 
-            <h3>Vendas por Cliente (GROUP BY)</h3>
+            <h3>Vendas por Cliente</h3>
             <table>
                 <thead>
                     <tr>
@@ -59,6 +59,22 @@
                     </tr>
                 </thead>
                 <tbody id="tabelaRelatorio"></tbody>
+            </table>
+
+            <h3>Estoque e movimentacoes automaticas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Produto</th>
+                        <th>Produto</th>
+                        <th>Categoria</th>
+                        <th>Estoque</th>
+                        <th>Disponivel</th>
+                        <th>Movimentacoes</th>
+                        <th>Ultima alteracao</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaRelatorioEstoque"></tbody>
             </table>
         </section>
 
@@ -156,16 +172,7 @@
                 <textarea id="descricao_produto" placeholder="Descricao"></textarea>
                 <input type="number" id="peso_produto" step="0.01" placeholder="Peso">
                 <input type="number" id="preco_base_produto" step="0.01" placeholder="Preco base" required>
-                <div class="availability-field">
-                    <span>Disponibilidade</span>
-                    <div class="toggle-group" role="radiogroup" aria-label="Disponibilidade do produto">
-                        <input type="radio" id="disponibilidade_produto_sim" name="disponibilidade_produto" value="true" checked>
-                        <label for="disponibilidade_produto_sim">Disponivel</label>
-
-                        <input type="radio" id="disponibilidade_produto_nao" name="disponibilidade_produto" value="false">
-                        <label for="disponibilidade_produto_nao">Indisponivel</label>
-                    </div>
-                </div>
+                <input type="number" id="estoque_produto" min="0" step="1" value="10" placeholder="Quantidade em estoque" required>
                 <select id="id_categoria_produto" required>
                     <option value="">Selecione uma categoria</option>
                 </select>
@@ -185,6 +192,7 @@
                         <th>Nome</th>
                         <th>Categoria</th>
                         <th>Preco Base</th>
+                        <th>Estoque</th>
                         <th>Disponivel</th>
                         <th>Acoes</th>
                     </tr>
@@ -199,7 +207,9 @@
             <form id="formPedido">
                 <input type="hidden" id="id_pedido">
                 <input type="date" id="data_previsao_entrega_pedido">
-                <input type="number" id="id_cliente_pedido" placeholder="ID do cliente" required>
+                <select id="id_cliente_pedido" required>
+                    <option value="">Selecione um cliente</option>
+                </select>
                 <select id="id_produto_pedido" required>
                     <option value="">Selecione um produto</option>
                 </select>
@@ -230,8 +240,9 @@
                 <tbody id="tabelaPedidosCrud"></tbody>
             </table>
         </section>
+
     </main>
 
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js?v=disponibilidade-auto-1"></script>
 </body>
 </html>

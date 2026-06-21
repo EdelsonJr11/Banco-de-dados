@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const ClienteDAO = require('./dao/ClienteDAO');
 const PedidoDAO = require('./dao/PedidoDAO');
 const ProdutoDAO = require('./dao/ProdutoDAO');
@@ -9,13 +10,23 @@ const SchemaDAO = require('./dao/SchemaDAO');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+    const inicio = Date.now();
+
+    res.on('finish', () => {
+        const duracao = Date.now() - inicio;
+        console.log(`${req.method} ${req.originalUrl} -> ${res.statusCode} (${duracao}ms)`);
+    });
+
+    next();
+});
 
 const asyncHandler = (handler) => (req, res, next) =>
     Promise.resolve(handler(req, res, next)).catch(next);
 
-/* =========================
+/* 
    CLIENTE CRUD COMPLETO
-========================= */
+ */
 
 // CREATE
 app.post('/clientes', asyncHandler(async (req, res) => {
@@ -62,9 +73,9 @@ app.delete('/clientes/:id', asyncHandler(async (req, res) => {
     res.json({ mensagem: 'Cliente deletado com sucesso' });
 }));
 
-/* =========================
+/*
    CATEGORIA CRUD COMPLETO
-========================= */
+*/
 
 // CREATE
 app.post('/categorias', asyncHandler(async (req, res) => {
@@ -111,9 +122,9 @@ app.delete('/categorias/:id', asyncHandler(async (req, res) => {
     res.json({ mensagem: 'Categoria deletada com sucesso' });
 }));
 
-/* =========================
+/*
    PRODUTO CRUD COMPLETO
-========================= */
+*/
 
 // CREATE
 app.post('/produtos', asyncHandler(async (req, res) => {
@@ -160,9 +171,9 @@ app.delete('/produtos/:id', asyncHandler(async (req, res) => {
     res.json({ mensagem: 'Produto deletado com sucesso' });
 }));
 
-/* =========================
+/* 
    PEDIDO CRUD COMPLETO
-========================= */
+*/
 
 // CREATE
 app.post('/pedidos', asyncHandler(async (req, res) => {
@@ -209,9 +220,9 @@ app.delete('/pedidos/:id', asyncHandler(async (req, res) => {
     res.json({ mensagem: 'Pedido deletado com sucesso' });
 }));
 
-/* =========================
+/* 
    RELATORIOS (JOIN + GROUP BY)
-========================= */
+ */
 
 app.get('/pedidos-com-cliente', asyncHandler(async (req, res) => {
     const dados = await PedidoDAO.listarPedidosComCliente();
@@ -223,17 +234,68 @@ app.get('/relatorio-vendas', asyncHandler(async (req, res) => {
     res.json(dados);
 }));
 
+app.get('/relatorio-estoque', asyncHandler(async (req, res) => {
+    const dados = await PedidoDAO.relatorioEstoque();
+    res.json(dados);
+}));
+
+app.get('/status', asyncHandler(async (req, res) => {
+    const [clientes, produtos, categorias, pedidos] = await Promise.all([
+        ClienteDAO.listarTodos(),
+        ProdutoDAO.listarTodos(),
+        CategoriaDAO.listarTodos(),
+        PedidoDAO.listarTodos()
+    ]);
+
+    res.json({
+        mensagem: 'API conectada ao PostgreSQL',
+        clientes: clientes.length,
+        produtos: produtos.length,
+        categorias: categorias.length,
+        pedidos: pedidos.length
+    });
+}));
+
+app.use(express.static(path.join(__dirname, 'frontend'), {
+    etag: false,
+    lastModified: false,
+    maxAge: 0
+}));
+
+app.get(/.*/, (req, res, next) => {
+    if (req.path.startsWith('/clientes')
+        || req.path.startsWith('/categorias')
+        || req.path.startsWith('/produtos')
+        || req.path.startsWith('/pedidos')
+        || req.path.startsWith('/relatorio')
+        || req.path.startsWith('/status')) {
+        return next();
+    }
+
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
+
 app.use((err, req, res, next) => {
     console.error(err);
-    const status = err.status || 500;
-    const mensagem = status === 500 ? 'Erro interno no servidor' : err.message;
+    const errosDeValidacaoPostgres = ['P0001', '23502', '23503', '23505', '23514'];
+    const status = err.status || (errosDeValidacaoPostgres.includes(err.code) ? 400 : 500);
+    const mensagem = status === 500 ? 'Erro no servidor, olhe os logs' : err.message;
     res.status(status).json({ mensagem });
 });
 
 async function iniciarServidor() {
     await SchemaDAO.garantirModeloCliente();
-    app.listen(3000, () => {
-        console.log('Servidor rodando na porta 3000');
+    await SchemaDAO.garantirRotinasEcommerce();
+    const port = process.env.PORT || 3000;
+    const [clientes, produtos, categorias, pedidos] = await Promise.all([
+        ClienteDAO.listarTodos(),
+        ProdutoDAO.listarTodos(),
+        CategoriaDAO.listarTodos(),
+        PedidoDAO.listarTodos()
+    ]);
+    console.log(`Clientes: ${clientes.length}, Produtos: ${produtos.length}, Categorias: ${categorias.length}, Pedidos: ${pedidos.length}`);
+    app.listen(port, () => {
+        console.log(`Servidor rodando na porta ${port}`);
     });
 }
 

@@ -27,14 +27,30 @@ export function createRelatoriosModule({ elements, requestJson, message, formatt
         `).join("");
     };
 
+    const renderEstoque = (produtos) => {
+        elements.tabelaRelatorioEstoque.innerHTML = produtos.map((produto) => `
+            <tr>
+                <td>${produto.id_produto}</td>
+                <td>${produto.produto}</td>
+                <td>${produto.categoria}</td>
+                <td>${produto.estoque}</td>
+                <td>${produto.disponibilidade ? "Sim" : "Nao"}</td>
+                <td>${produto.total_movimentacoes}</td>
+                <td>${formatters.formatDateTime(produto.ultima_alteracao)}</td>
+            </tr>
+        `).join("");
+    };
+
     const load = async () => {
-        const [pedidosJoin, relatorio] = await Promise.all([
+        const [pedidosJoin, relatorio, estoque] = await Promise.all([
             requestJson("/pedidos-com-cliente"),
-            requestJson("/relatorio-vendas")
+            requestJson("/relatorio-vendas"),
+            requestJson("/relatorio-estoque")
         ]);
 
         renderPedidosJoin(pedidosJoin);
         renderRelatorio(relatorio);
+        renderEstoque(estoque);
     };
 
     const bind = () => {

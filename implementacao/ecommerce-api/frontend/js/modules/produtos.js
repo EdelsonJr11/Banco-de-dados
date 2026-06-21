@@ -1,28 +1,14 @@
 import { query } from "../dom.js";
 import { runWithUiError } from "./helpers.js";
 
-export function createProdutosModule({ elements, requestJson, message, formatters }) {
-    const getDisponibilidadeSelecionada = () => {
-        const checked = query('input[name="disponibilidade_produto"]:checked');
-        return checked ? checked.value === "true" : true;
-    };
-
-    const setDisponibilidadeSelecionada = (valor) => {
-        const isDisponivel = Boolean(valor);
-        const selector = isDisponivel
-            ? '#disponibilidade_produto_sim'
-            : '#disponibilidade_produto_nao';
-        const input = query(selector);
-        if (input) input.checked = true;
-    };
-
+export function createProdutosModule({ elements, requestJson, message, formatters, onChanged = async () => {} }) {
     const fillProdutoSelect = (produtos) => {
         const selected = elements.selectProdutoPedido.value;
         const disponiveis = produtos.filter((p) => p.disponibilidade);
         const indisponiveis = produtos.filter((p) => !p.disponibilidade);
         const options = [
             '<option value="">Selecione um produto</option>',
-            ...disponiveis.map((p) => `<option value="${p.id_produto}" data-disponivel="true">${p.id_produto} - ${p.nome}</option>`),
+            ...disponiveis.map((p) => `<option value="${p.id_produto}" data-disponivel="true">${p.id_produto} - ${p.nome} (estoque: ${p.estoque})</option>`),
             ...(indisponiveis.length > 0
                 ? [
                     '<option value="" disabled>----- Indisponiveis -----</option>',
@@ -43,7 +29,7 @@ export function createProdutosModule({ elements, requestJson, message, formatter
         query("#descricao_produto").value = "";
         query("#peso_produto").value = "";
         query("#preco_base_produto").value = "";
-        setDisponibilidadeSelecionada(true);
+        query("#estoque_produto").value = "10";
         elements.selectCategoriaProduto.value = "";
     };
 
@@ -54,6 +40,7 @@ export function createProdutosModule({ elements, requestJson, message, formatter
                 <td>${p.nome}</td>
                 <td>${p.nome_categoria || "-"}</td>
                 <td>${formatters.formatMoney(p.preco_base)}</td>
+                <td>${p.estoque}</td>
                 <td>${p.disponibilidade ? "Sim" : "Nao"}</td>
                 <td>
                     <button type="button" data-acao="editar" data-id="${p.id_produto}">Editar</button>
@@ -79,7 +66,7 @@ export function createProdutosModule({ elements, requestJson, message, formatter
                 descricao: query("#descricao_produto").value || null,
                 peso: formatters.toNumberOrNull(query("#peso_produto").value),
                 preco_base: formatters.toNumberOrNull(query("#preco_base_produto").value),
-                disponibilidade: getDisponibilidadeSelecionada(),
+                estoque: formatters.toNumberOrNull(query("#estoque_produto").value) ?? 0,
                 id_categoria: formatters.toNumberOrNull(elements.selectCategoriaProduto.value)
             };
 
@@ -102,7 +89,7 @@ export function createProdutosModule({ elements, requestJson, message, formatter
             }
 
             clearForm();
-            await load();
+            await Promise.all([load(), onChanged()]);
         });
     };
 
@@ -113,7 +100,7 @@ export function createProdutosModule({ elements, requestJson, message, formatter
         query("#descricao_produto").value = produto.descricao || "";
         query("#peso_produto").value = produto.peso ?? "";
         query("#preco_base_produto").value = produto.preco_base ?? "";
-        setDisponibilidadeSelecionada(produto.disponibilidade);
+        query("#estoque_produto").value = produto.estoque ?? 0;
         elements.selectCategoriaProduto.value = produto.id_categoria ?? "";
     };
 
@@ -139,7 +126,7 @@ export function createProdutosModule({ elements, requestJson, message, formatter
                 if (button.dataset.acao === "editar") await editar(id);
                 if (button.dataset.acao === "excluir") {
                     await excluir(id);
-                    await load();
+                    await Promise.all([load(), onChanged()]);
                 }
             });
         });

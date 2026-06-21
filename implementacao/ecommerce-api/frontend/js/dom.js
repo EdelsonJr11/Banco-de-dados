@@ -17,6 +17,7 @@ export const elements = {
     tabelaPedidosCrud: $("#tabelaPedidosCrud"),
     tabelaPedidosJoin: $("#tabelaPedidosJoin"),
     tabelaRelatorio: $("#tabelaRelatorio"),
+    tabelaRelatorioEstoque: $("#tabelaRelatorioEstoque"),
 
     btnAtualizarRelatorios: $("#btnAtualizarRelatorios"),
     btnAtualizarClientes: $("#btnAtualizarClientes"),
@@ -31,6 +32,7 @@ export const elements = {
     btnLimparPedido: $("#btnLimparPedido"),
 
     selectCategoriaProduto: $("#id_categoria_produto"),
+    selectClientePedido: $("#id_cliente_pedido"),
     selectProdutoPedido: $("#id_produto_pedido"),
 
     selectTipoCliente: $("#tipo_cliente"),

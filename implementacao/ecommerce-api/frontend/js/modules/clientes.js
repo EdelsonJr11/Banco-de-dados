@@ -1,7 +1,7 @@
 import { query } from "../dom.js";
 import { runWithUiError } from "./helpers.js";
 
-export function createClientesModule({ elements, requestJson, message }) {
+export function createClientesModule({ elements, requestJson, message, onChanged = async () => {} }) {
     const camposPf = ["#nome", "#cpf", "#data_nascimento", "#genero"];
     const camposPj = ["#cnpj", "#razao_social"];
 
@@ -59,9 +59,22 @@ export function createClientesModule({ elements, requestJson, message }) {
         `).join("");
     };
 
+    const fillClientePedidoSelect = (clientes) => {
+        const selected = elements.selectClientePedido.value;
+        elements.selectClientePedido.innerHTML = [
+            '<option value="">Selecione um cliente</option>',
+            ...clientes.map((cliente) =>
+                `<option value="${cliente.id_cliente}">${cliente.id_cliente} - ${cliente.nome_exibicao}</option>`
+            )
+        ].join("");
+
+        if (selected) elements.selectClientePedido.value = selected;
+    };
+
     const load = async () => {
         const clientes = await requestJson("/clientes");
         render(clientes);
+        fillClientePedidoSelect(clientes);
     };
 
     const montarPayload = () => ({
@@ -104,7 +117,7 @@ export function createClientesModule({ elements, requestJson, message }) {
             }
 
             clearForm();
-            await load();
+            await Promise.all([load(), onChanged()]);
         });
     };
 
@@ -160,7 +173,7 @@ export function createClientesModule({ elements, requestJson, message }) {
                 if (button.dataset.acao === "editar") await editar(id);
                 if (button.dataset.acao === "excluir") {
                     await excluir(id);
-                    await load();
+                    await Promise.all([load(), onChanged()]);
                 }
             });
         });

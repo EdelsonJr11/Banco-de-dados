@@ -1,0 +1,407 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+4 0 obj
+<< /Type /Pages /Kids [ 6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R ] /Count 7 >>
+endobj
+5 0 obj
+<< /Length 1082 >>
+stream
+BT /F2 24 Tf 26 TL 170 770 Td
+(SISTEMA E-COMMERCE) Tj
+ET
+BT /F2 14 Tf 18 TL 120 730 Td
+(Guia Didatico da Terceira Entrega) Tj
+T*
+(Implantacao no PostgreSQL + CRUD + DAO + JOIN/GROUP BY) Tj
+ET
+BT /F1 12 Tf 16 TL 72 680 Td
+(Objetivo deste PDF:) Tj
+T*
+(explicar o funcionamento do sistema com foco direto no que foi pedido pelo professor.) Tj
+ET
+BT /F1 11 Tf 15 TL 72 620 Td
+(Arquivos principais analisados:) Tj
+T*
+(- implementacao/database.sql) Tj
+T*
+(- implementacao/ecommerce-api/dao/*.js) Tj
+T*
+(- implementacao/ecommerce-api/server.js) Tj
+T*
+(- implementacao/ecommerce-api/frontend/*) Tj
+ET
+0.2 w 68 540 460 0 re S
+BT /F1 11 Tf 15 TL 72 510 Td
+(Resumo rapido:) Tj
+T*
+(1\) Banco modelado em PostgreSQL com constraints, trigger e integridade.) Tj
+T*
+(2\) DAO implementado para Cliente, Categoria, Produto e Pedido.) Tj
+T*
+(3\) API Express com CRUD completo e frontend modular para operacao.) Tj
+T*
+(4\) JOIN e GROUP BY implementados nos relatorios de pedidos e vendas.) Tj
+ET
+BT /F1 9 Tf 12 TL 72 90 Td
+(Documento gerado automaticamente para apoio de apresentacao da entrega.) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 4 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 1200 >>
+stream
+BT /F2 16 Tf 20 TL 72 790 Td
+(1\) Requisitos do professor \(itens 6, 7, 8 e 9\)) Tj
+ET
+BT /F1 11 Tf 16 TL 72 760 Td
+(Item 6: criar script no PostgreSQL + desenvolver aplicacao com CRUD.) Tj
+T*
+(Item 7: entregar script da base, DAO e aplicacao CRUD via DAO.) Tj
+T*
+(Item 8: usar ao menos JOIN ou GROUP BY nas consultas.) Tj
+T*
+(Item 9: linguagem/plataforma de livre escolha.) Tj
+ET
+BT /F2 13 Tf 16 TL 72 670 Td
+(Como o sistema atende cada item) Tj
+ET
+BT /F1 11 Tf 14 TL 72 645 Td
+(- Script PostgreSQL: implementacao/database.sql) Tj
+T*
+(  contem CREATE TABLE, constraints, trigger e funcao de validacao.) Tj
+T*
+() Tj
+T*
+(- DAO no projeto: pasta implementacao/ecommerce-api/dao) Tj
+T*
+(  ClienteDAO, CategoriaDAO, ProdutoDAO, PedidoDAO e SchemaDAO.) Tj
+T*
+() Tj
+T*
+(- Aplicacao CRUD via DAO: implementacao/ecommerce-api/server.js) Tj
+T*
+(  endpoints REST de create, read, update e delete.) Tj
+T*
+() Tj
+T*
+(- JOIN/GROUP BY presentes:) Tj
+T*
+(  PedidoDAO.listarPedidosComCliente\(\) usa JOIN com cliente/pf/pj/item.) Tj
+T*
+(  PedidoDAO.totalVendasPorCliente\(\) usa agregacao com GROUP BY.) Tj
+T*
+() Tj
+T*
+(- Plataforma:) Tj
+T*
+(  backend Node.js + Express, banco PostgreSQL, frontend HTML/CSS/JS.) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 4 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 1185 >>
+stream
+BT /F2 16 Tf 20 TL 72 790 Td
+(2\) Banco de dados PostgreSQL \(script\)) Tj
+ET
+BT /F1 11 Tf 15 TL 72 760 Td
+(Arquivo: implementacao/database.sql) Tj
+T*
+(Tabelas principais:) Tj
+T*
+(cliente, endereco, telefone, pessoa_fisica, pessoa_juridica,) Tj
+T*
+(categoria, produto, pedido, item_pedido e status_entrega.) Tj
+ET
+BT /F2 13 Tf 16 TL 72 690 Td
+(Regras de integridade implementadas) Tj
+ET
+BT /F1 11 Tf 14 TL 72 665 Td
+(- PK e FK em todas as relacoes principais.) Tj
+T*
+(- CHECK em tipo de cliente \(PF/PJ\).) Tj
+T*
+(- CHECK em genero \(M/F\).) Tj
+T*
+(- CHECK em quantidade/preco/desconto do item_pedido.) Tj
+T*
+(- UNIQUE em email do cliente e em telefone por cliente.) Tj
+T*
+(- Trigger + funcao PL/pgSQL:) Tj
+T*
+(  bloqueia item_pedido quando produto estiver indisponivel.) Tj
+ET
+BT /F2 13 Tf 16 TL 72 545 Td
+(Mini visao relacional \(texto\)) Tj
+ET
+BT /F3 10 Tf 13 TL 72 520 Td
+(cliente \(1\) -> \(N\) pedido) Tj
+T*
+(pedido \(1\) -> \(N\) item_pedido) Tj
+T*
+(produto \(1\) -> \(N\) item_pedido) Tj
+T*
+(categoria \(1\) -> \(N\) produto) Tj
+T*
+(cliente \(1\) -> \(1\) endereco) Tj
+T*
+(cliente \(1\) -> \(N\) telefone) Tj
+T*
+(cliente \(1\) -> \(0..1\) pessoa_fisica / pessoa_juridica) Tj
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 4 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 1002 >>
+stream
+BT /F2 16 Tf 20 TL 72 790 Td
+(3\) Arquitetura da aplicacao) Tj
+ET
+0.15 w 0 0 0 RG
+68 565 140 70 re S
+228 565 140 70 re S
+388 565 140 70 re S
+208 600 m 228 600 l S
+368 600 m 388 600 l S
+BT /F2 11 Tf 13 TL 114 610 Td
+(Frontend) Tj
+ET
+BT /F1 10 Tf 12 TL 98 592 Td
+(HTML/CSS/JS) Tj
+ET
+BT /F1 10 Tf 12 TL 114 578 Td
+(modulos) Tj
+ET
+BT /F2 11 Tf 13 TL 270 610 Td
+(API Express) Tj
+ET
+BT /F1 10 Tf 12 TL 283 592 Td
+(server.js) Tj
+ET
+BT /F1 10 Tf 12 TL 276 578 Td
+(rotas CRUD) Tj
+ET
+BT /F2 11 Tf 13 TL 425 610 Td
+(DAO + PostgreSQL) Tj
+ET
+BT /F1 10 Tf 12 TL 416 592 Td
+(Cliente/Pedido/...) Tj
+ET
+BT /F1 10 Tf 12 TL 438 578 Td
+(SQL + regras) Tj
+ET
+BT /F1 11 Tf 15 TL 72 520 Td
+(Responsabilidades por camada:) Tj
+T*
+(- Frontend: formulario, navegacao, chamadas fetch e render de tabelas/relatorios.) Tj
+T*
+(- API: valida entrada, chama DAO e devolve JSON padronizado.) Tj
+T*
+(- DAO: concentra SQL \(CRUD, JOIN, GROUP BY e transacoes\).) Tj
+T*
+(- Banco: constraints, FKs, checks e trigger de disponibilidade.) Tj
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 4 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 11 0 R >>
+endobj
+13 0 obj
+<< /Length 1060 >>
+stream
+BT /F2 16 Tf 20 TL 72 790 Td
+(4\) CRUD atraves do DAO) Tj
+ET
+BT /F1 11 Tf 14 TL 72 760 Td
+(Arquivo de rotas: implementacao/ecommerce-api/server.js) Tj
+ET
+BT /F2 13 Tf 16 TL 72 730 Td
+(Entidades com CRUD completo) Tj
+ET
+BT /F1 11 Tf 15 TL 72 705 Td
+(- /clientes) Tj
+T*
+(- /categorias) Tj
+T*
+(- /produtos) Tj
+T*
+(- /pedidos) Tj
+ET
+BT /F2 13 Tf 16 TL 72 620 Td
+(Exemplo didatico de fluxo \(create pedido\)) Tj
+ET
+BT /F1 11 Tf 15 TL 72 595 Td
+(1\) Front envia pedido com id_cliente e itens.) Tj
+T*
+(2\) PedidoDAO valida lista de itens e quantidade.) Tj
+T*
+(3\) PedidoDAO consulta produto para buscar preco_base atual.) Tj
+T*
+(4\) PedidoDAO bloqueia se produto indisponivel.) Tj
+T*
+(5\) Transacao: grava pedido e depois grava item_pedido.) Tj
+T*
+(6\) Retorna pedido criado em JSON.) Tj
+ET
+BT /F2 13 Tf 16 TL 72 490 Td
+(Observacao tecnica importante) Tj
+ET
+BT /F1 11 Tf 15 TL 72 465 Td
+(Preco do item nao e digitado no pedido.) Tj
+T*
+(Ele e buscado automaticamente da tabela produto \(preco_base\),) Tj
+T*
+(garantindo coerencia com o estado atual do catalogo.) Tj
+ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 4 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 13 0 R >>
+endobj
+15 0 obj
+<< /Length 1096 >>
+stream
+BT /F2 16 Tf 20 TL 72 790 Td
+(5\) Requisito de JOIN e GROUP BY) Tj
+ET
+BT /F1 11 Tf 15 TL 72 760 Td
+(JOIN \(relatorio de pedidos com cliente\):) Tj
+T*
+(metodo PedidoDAO.listarPedidosComCliente\(\)) Tj
+T*
+(junta pedido + cliente + pessoa_fisica/pessoa_juridica + item_pedido.) Tj
+ET
+BT /F1 11 Tf 15 TL 72 695 Td
+(GROUP BY \(total de vendas por cliente\):) Tj
+T*
+(metodo PedidoDAO.totalVendasPorCliente\(\)) Tj
+T*
+(soma total por cliente e conta quantidade de pedidos.) Tj
+ET
+BT /F2 13 Tf 16 TL 72 630 Td
+(Trecho simplificado de SQL) Tj
+ET
+BT /F3 10 Tf 14 TL 72 605 Td
+(SELECT c.id_cliente, ccn.nome, COUNT\(tpp.id_pedido\), SUM\(tpp.total_pedido\)) Tj
+T*
+(FROM cliente_com_nome ccn) Tj
+T*
+(LEFT JOIN total_por_pedido tpp ON tpp.id_cliente = ccn.id_cliente) Tj
+T*
+(GROUP BY ccn.id_cliente, ccn.nome, ccn.tipo;) Tj
+ET
+BT /F1 11 Tf 15 TL 72 510 Td
+(Resultado esperado no sistema:) Tj
+T*
+(- Tela de relatorios mostra pedidos com dados do cliente.) Tj
+T*
+(- Tela de relatorios mostra total de pedidos e total de vendas por cliente.) Tj
+T*
+(- Esses dados atendem diretamente o item 8 da atividade.) Tj
+ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 4 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 15 0 R >>
+endobj
+17 0 obj
+<< /Length 1266 >>
+stream
+BT /F2 16 Tf 20 TL 72 790 Td
+(6\) Como executar e apresentar) Tj
+ET
+BT /F2 13 Tf 16 TL 72 760 Td
+(Passo a passo minimo) Tj
+ET
+BT /F1 11 Tf 15 TL 72 735 Td
+(1\) Criar banco no PostgreSQL \(ex.: ecommerce\).) Tj
+T*
+(2\) Executar implementacao/database.sql.) Tj
+T*
+(3\) Ajustar credenciais em implementacao/ecommerce-api/db.js.) Tj
+T*
+(4\) Instalar dependencias: npm install) Tj
+T*
+(5\) Subir API: node server.js) Tj
+T*
+(6\) Abrir frontend: implementacao/ecommerce-api/frontend/index.html) Tj
+ET
+BT /F2 13 Tf 16 TL 72 620 Td
+(Checklist para a apresentacao da entrega) Tj
+ET
+BT /F1 11 Tf 15 TL 72 595 Td
+([ ] Mostrar script SQL e principais tabelas/relacoes.) Tj
+T*
+([ ] Mostrar CRUD de cliente, produto e pedido funcionando.) Tj
+T*
+([ ] Mostrar validacao de produto indisponivel no pedido.) Tj
+T*
+([ ] Mostrar endpoint/tela de JOIN \(pedidos com cliente\).) Tj
+T*
+([ ] Mostrar endpoint/tela de GROUP BY \(vendas por cliente\).) Tj
+T*
+([ ] Explicar onde o DAO centraliza regras e SQL.) Tj
+ET
+BT /F2 13 Tf 16 TL 72 490 Td
+(Conclusao) Tj
+ET
+BT /F1 11 Tf 15 TL 72 465 Td
+(A implementacao atende os itens da Terceira Entrega:) Tj
+T*
+(script PostgreSQL + DAO + aplicacao CRUD com JOIN/GROUP BY.) Tj
+T*
+(A arquitetura esta organizada e pronta para demonstracao em sala.) Tj
+ET
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 4 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 17 0 R >>
+endobj
+19 0 obj
+<< /Type /Catalog /Pages 4 0 R >>
+endobj
+xref
+0 20
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000000228 00000 n 
+0000000328 00000 n 
+0000001462 00000 n 
+0000001608 00000 n 
+0000002860 00000 n 
+0000003006 00000 n 
+0000004243 00000 n 
+0000004390 00000 n 
+0000005445 00000 n 
+0000005593 00000 n 
+0000006706 00000 n 
+0000006854 00000 n 
+0000008003 00000 n 
+0000008151 00000 n 
+0000009470 00000 n 
+0000009618 00000 n 
+trailer
+<< /Size 20 /Root 19 0 R >>
+startxref
+9668
+%%EOF
